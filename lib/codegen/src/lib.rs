@@ -104,6 +104,7 @@ mod partition_slice;
 mod postopt;
 mod predicates;
 mod preopt;
+mod superopt;
 mod ref_slice;
 mod regalloc;
 mod scoped_hash_map;

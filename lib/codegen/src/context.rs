@@ -21,6 +21,7 @@ use loop_analysis::LoopAnalysis;
 use nan_canonicalization::do_nan_canonicalization;
 use postopt::do_postopt;
 use preopt::do_preopt;
+use superopt::do_superopt;
 use regalloc;
 use result::{CtonError, CtonResult};
 use settings::{FlagsOrIsa, OptLevel};
