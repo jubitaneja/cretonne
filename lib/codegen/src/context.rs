@@ -137,6 +137,7 @@ impl Context {
             self.compute_domtree();
             self.compute_loop_analysis();
             self.licm(isa)?;
+            self.superopt(isa)?;
             self.simple_gvn(isa)?;
         }
         self.compute_domtree();
@@ -236,6 +237,13 @@ impl Context {
     /// Perform post-legalization rewrites on the function.
     pub fn postopt(&mut self, isa: &TargetIsa) -> CtonResult {
         do_postopt(&mut self.func, isa);
+        self.verify_if(isa)?;
+        Ok(())
+    }
+
+    /// Perform superoptimization on the function.
+    pub fn superopt(&mut self, isa: &TargetIsa) -> CtonResult {
+        do_superopt(&mut self.func, isa);
         self.verify_if(isa)?;
         Ok(())
     }
