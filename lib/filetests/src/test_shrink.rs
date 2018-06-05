@@ -1,4 +1,7 @@
-//! Test command for testing the postopt pass.
+//! Test command for testing the Shrink pass.
+//!
+//! The `shrink` test command runs each function through the Shrink pass after ensuring
+//! that all instructions are legal for the target.
 //!
 //! The resulting function is sent to `filecheck`.
 
@@ -9,20 +12,20 @@ use cretonne_reader::TestCommand;
 use std::borrow::Cow;
 use subtest::{run_filecheck, Context, SubTest, SubtestResult};
 
-struct TestPostopt;
+struct TestShrink;
 
 pub fn subtest(parsed: &TestCommand) -> SubtestResult<Box<SubTest>> {
-    assert_eq!(parsed.command, "postopt");
+    assert_eq!(parsed.command, "shrink");
     if !parsed.options.is_empty() {
         Err(format!("No options allowed on {}", parsed))
     } else {
-        Ok(Box::new(TestPostopt))
+        Ok(Box::new(TestShrink))
     }
 }
 
-impl SubTest for TestPostopt {
+impl SubTest for TestShrink {
     fn name(&self) -> &'static str {
-        "postopt"
+        "shrink"
     }
 
     fn is_mutating(&self) -> bool {
@@ -30,12 +33,11 @@ impl SubTest for TestPostopt {
     }
 
     fn run(&self, func: Cow<Function>, context: &Context) -> SubtestResult<()> {
+        let isa = context.isa.expect("shrink needs an ISA");
         let mut comp_ctx = cretonne_codegen::Context::for_function(func.into_owned());
-        let isa = context.isa.expect("postopt needs an ISA");
 
-        comp_ctx.flowgraph();
         comp_ctx
-            .postopt(isa)
+            .shrink_instructions(isa)
             .map_err(|e| pretty_error(&comp_ctx.func, context.isa, Into::into(e)))?;
 
         let text = comp_ctx.func.to_string();

@@ -10,12 +10,11 @@ use cretonne_codegen::ir::Function;
 use cretonne_codegen::print_errors::pretty_error;
 use cretonne_reader::TestCommand;
 use std::borrow::Cow;
-use std::fmt::Write;
-use subtest::{run_filecheck, Context, Result, SubTest};
+use subtest::{run_filecheck, Context, SubTest, SubtestResult};
 
 struct TestRegalloc;
 
-pub fn subtest(parsed: &TestCommand) -> Result<Box<SubTest>> {
+pub fn subtest(parsed: &TestCommand) -> SubtestResult<Box<SubTest>> {
     assert_eq!(parsed.command, "regalloc");
     if !parsed.options.is_empty() {
         Err(format!("No options allowed on {}", parsed))
@@ -25,8 +24,8 @@ pub fn subtest(parsed: &TestCommand) -> Result<Box<SubTest>> {
 }
 
 impl SubTest for TestRegalloc {
-    fn name(&self) -> Cow<str> {
-        Cow::from("regalloc")
+    fn name(&self) -> &'static str {
+        "regalloc"
     }
 
     fn is_mutating(&self) -> bool {
@@ -37,12 +36,9 @@ impl SubTest for TestRegalloc {
         true
     }
 
-    fn run(&self, func: Cow<Function>, context: &Context) -> Result<()> {
+    fn run(&self, func: Cow<Function>, context: &Context) -> SubtestResult<()> {
         let isa = context.isa.expect("register allocator needs an ISA");
-
-        // Create a compilation context, and drop in the function.
-        let mut comp_ctx = cretonne_codegen::Context::new();
-        comp_ctx.func = func.into_owned();
+        let mut comp_ctx = cretonne_codegen::Context::for_function(func.into_owned());
 
         comp_ctx.compute_cfg();
         // TODO: Should we have an option to skip legalization?
@@ -54,8 +50,7 @@ impl SubTest for TestRegalloc {
             .regalloc(isa)
             .map_err(|e| pretty_error(&comp_ctx.func, context.isa, e))?;
 
-        let mut text = String::new();
-        write!(&mut text, "{}", &comp_ctx.func.display(Some(isa))).map_err(|e| e.to_string())?;
+        let text = comp_ctx.func.display(Some(isa)).to_string();
         run_filecheck(&text, context)
     }
 }

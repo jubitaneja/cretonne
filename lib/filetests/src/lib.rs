@@ -45,6 +45,7 @@ mod test_postopt;
 mod test_preopt;
 mod test_print_cfg;
 mod test_regalloc;
+mod test_shrink;
 mod test_simple_gvn;
 mod test_verifier;
 
@@ -79,7 +80,7 @@ pub fn run(verbose: bool, files: &[String]) -> TestResult {
 ///
 /// This function knows how to create all of the possible `test <foo>` commands that can appear in
 /// a `.cton` test file.
-fn new_subtest(parsed: &TestCommand) -> subtest::Result<Box<subtest::SubTest>> {
+fn new_subtest(parsed: &TestCommand) -> subtest::SubtestResult<Box<subtest::SubTest>> {
     match parsed.command {
         "binemit" => test_binemit::subtest(parsed),
         "cat" => test_cat::subtest(parsed),
@@ -92,6 +93,7 @@ fn new_subtest(parsed: &TestCommand) -> subtest::Result<Box<subtest::SubTest>> {
         "preopt" => test_preopt::subtest(parsed),
         "print-cfg" => test_print_cfg::subtest(parsed),
         "regalloc" => test_regalloc::subtest(parsed),
+        "shrink" => test_shrink::subtest(parsed),
         "simple-gvn" => test_simple_gvn::subtest(parsed),
         "verifier" => test_verifier::subtest(parsed),
         _ => Err(format!("unknown test command '{}'", parsed.command)),

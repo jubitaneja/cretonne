@@ -7,12 +7,11 @@ use cretonne_codegen::print_errors::pretty_error;
 use cretonne_codegen::{binemit, ir};
 use cretonne_reader::TestCommand;
 use std::borrow::Cow;
-use std::fmt::Write;
-use subtest::{run_filecheck, Context, Result, SubTest};
+use subtest::{run_filecheck, Context, SubTest, SubtestResult};
 
 struct TestCompile;
 
-pub fn subtest(parsed: &TestCommand) -> Result<Box<SubTest>> {
+pub fn subtest(parsed: &TestCommand) -> SubtestResult<Box<SubTest>> {
     assert_eq!(parsed.command, "compile");
     if !parsed.options.is_empty() {
         Err(format!("No options allowed on {}", parsed))
@@ -22,8 +21,8 @@ pub fn subtest(parsed: &TestCommand) -> Result<Box<SubTest>> {
 }
 
 impl SubTest for TestCompile {
-    fn name(&self) -> Cow<str> {
-        Cow::from("compile")
+    fn name(&self) -> &'static str {
+        "compile"
     }
 
     fn is_mutating(&self) -> bool {
@@ -34,12 +33,9 @@ impl SubTest for TestCompile {
         true
     }
 
-    fn run(&self, func: Cow<ir::Function>, context: &Context) -> Result<()> {
+    fn run(&self, func: Cow<ir::Function>, context: &Context) -> SubtestResult<()> {
         let isa = context.isa.expect("compile needs an ISA");
-
-        // Create a compilation context, and drop in the function.
-        let mut comp_ctx = cretonne_codegen::Context::new();
-        comp_ctx.func = func.into_owned();
+        let mut comp_ctx = cretonne_codegen::Context::for_function(func.into_owned());
 
         let code_size = comp_ctx
             .compile(isa)
@@ -67,8 +63,7 @@ impl SubTest for TestCompile {
         }
 
         // Run final code through filecheck.
-        let mut text = String::new();
-        write!(&mut text, "{}", &comp_ctx.func.display(Some(isa))).map_err(|e| e.to_string())?;
+        let text = comp_ctx.func.display(Some(isa)).to_string();
         run_filecheck(&text, context)
     }
 }
