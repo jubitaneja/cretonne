@@ -1,11 +1,9 @@
 // Superoptimization pass
 
 use cursor::{Cursor, FuncCursor};
-//use ir::function::Function;
 use isa::TargetIsa;
 use timing;
 use ir::Inst;
-//use ir::InstructionData;
 use ir::instructions::Opcode;
 use ir::dfg::ValueDef;
 use ir::{Function, InstBuilder, InstructionData};
@@ -55,7 +53,6 @@ pub fn do_superopt(func: &mut Function, _isa: &TargetIsa) {
 
     while let Some(_ebb) = pos.next_ebb() {
         while let Some(inst) = pos.next_inst() {
-            // add transformations here
             opt_driver(&mut pos, inst);
         }
     }
