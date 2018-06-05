@@ -125,6 +125,7 @@ impl Context {
         self.compute_cfg();
         if isa.flags().opt_level() != OptLevel::Fastest {
             self.preopt(isa)?;
+            self.superopt(isa)?;
         }
         if isa.flags().enable_nan_canonicalization() {
             self.canonicalize_nans(isa)?;
@@ -137,7 +138,6 @@ impl Context {
             self.compute_domtree();
             self.compute_loop_analysis();
             self.licm(isa)?;
-            self.superopt(isa)?;
             self.simple_gvn(isa)?;
         }
         self.compute_domtree();
