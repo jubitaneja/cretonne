@@ -34,15 +34,30 @@ fn opt_driver(pos: &mut FuncCursor, inst: Inst) {
                                 }
                             }
                         }
-                    }
-                    else {
+                    } else if let ValueDef::Param(_, _) = pos.func.dfg.value_def(args[1]) {
+                        if let ValueDef::Result(arg_ty, _) = pos.func.dfg.value_def(args[0]) {
+                            if let InstructionData::Binary {
+                                opcode: Opcode::Iadd, args,
+                            } = pos.func.dfg[arg_ty]
+                            {
+                                if let ValueDef::Param(_, _) = pos.func.dfg.value_def(args[0]) {
+                                    if let ValueDef::Param(_, _) = pos.func.dfg.value_def(args[1]) {
+                                        pos.func
+                                            .dfg
+                                            .replace(inst)
+                                            .imul_imm(args[1], 3);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
                         return;
                     }
                 },
-                _ => {},
+                _ => (),
             };
         },
-        _ => {},
+        _ => (),
     }
 }
 
