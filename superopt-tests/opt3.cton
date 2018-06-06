@@ -1,0 +1,12 @@
+function u0:0(i32, i32, i64 vmctx) -> i32 fast {
+                                ebb0(v0: i32, v1: i32, v2: i64):
+@0005                               v3 = iadd_imm v1, 4294967295
+@0007                               v4 = iconst.i32 2
+@0009                               v5 = ishl v3, v4
+@0011                               v6 = iadd v0, v5
+@0013                               v7 = iadd_imm v6, 348
+@0015                               jump ebb1(v7)
+
+                                ebb1(v8: i32):
+@0015                               return v8
+}
