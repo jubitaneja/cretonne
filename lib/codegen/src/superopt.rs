@@ -5,7 +5,7 @@ use isa::TargetIsa;
 use timing;
 use ir::Inst;
 use ir::instructions::Opcode;
-use ir::types::I64;
+use ir::types::I32;
 use ir::dfg::ValueDef;
 use ir::{Function, InstBuilder, InstructionData};
 
@@ -116,7 +116,7 @@ fn opt_driver(pos: &mut FuncCursor, inst: Inst) {
                                                                         let inst6 = pos.ins()
                                                                                        .ishl_imm(arg, 2);
                                                                         let constinst = pos.ins()
-                                                                                           .iconst(I64, 4294967295);
+                                                                                           .iconst(I32, 4294967295);
                                                                         let inst7 = pos.ins()
                                                                                        .isub(inst6, constinst);
                                                                         pos.func.dfg
